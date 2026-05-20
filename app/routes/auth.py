@@ -1,3 +1,4 @@
+from app import limiter
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app import db
 from app.models import User, UserSettings
@@ -14,6 +15,7 @@ def home():
 
 
 @auth.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     if request.method == 'POST':
         email    = request.form['email']
