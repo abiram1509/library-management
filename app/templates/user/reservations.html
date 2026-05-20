@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}My Reservations{% endblock %}
+
+{% block styles %}
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.stat-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #2a2a3e;
+}
+.stat-card .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-card .value { font-size: 32px; font-weight: 700; }
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #2a2a3e;
+}
+.tab {
+    padding: 10px 20px;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+.tab.active { color: #7c6af7; border-bottom: 2px solid #7c6af7; }
+.res-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+.res-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #2a2a3e;
+}
+.res-card .badge-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+.pending-badge   { background: #2a2000; color: #ffaa00; }
+.available-badge { background: #002a1a; color: #00c851; }
+.fulfilled-badge { background: #001a2a; color: #4a9eff; }
+.res-card h3  { font-size: 15px; margin-bottom: 4px; }
+.res-card .book-id { font-size: 12px; color: #666; margin-bottom: 12px; }
+.time-row { font-size: 12px; color: #666; margin-bottom: 6px; }
+.time-row span { color: #aaa; }
+.cancel-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid #ff4444;
+    border-radius: 8px;
+    color: #ff4444;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+{% endblock %}
+
+{% block content %}
+<div class="page-title">My Reservations</div>
+<div class="page-subtitle">Manage and track your book reservations</div>
+
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="label">Total Reservations</div>
+        <div class="value">{{ total }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Active</div>
+        <div class="value" style="color:#ffaa00">{{ active }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Ready to Pick Up</div>
+        <div class="value" style="color:#00c851">{{ ready }}</div>
+    </div>
+</div>
+
+<div class="tabs">
+    <a href="?status=all"       class="tab {% if status == 'all' %}active{% endif %}">All Reservations</a>
+    <a href="?status=pending"   class="tab {% if status == 'pending' %}active{% endif %}">Active</a>
+    <a href="?status=fulfilled" class="tab {% if status == 'fulfilled' %}active{% endif %}">Completed</a>
+</div>
+
+<div class="res-grid">
+{% for res in reservations %}
+<div class="res-card">
+    <span class="badge-label {{ res.status }}-badge">
+        {% if res.status == 'pending' %}⏳ PENDING
+        {% elif res.status == 'available' %}READY TO PICK UP
+        {% elif res.status == 'fulfilled' %}FULFILLED
+        {% else %}✕ CANCELLED{% endif %}
+    </span>
+    <div class="book-id">BOOK ID #{{ res.book_id }}</div>
+    <h3>{{ res.book.title }}</h3>
+    <div class="time-row">🕐 Reserved: <span>{{ res.reserved_at.strftime('%b %d, %Y, %I:%M %p') }}</span></div>
+    {% if res.available_at %}
+    <div class="time-row" style="color:#00c851">📗 Available: <span>{{ res.available_at.strftime('%b %d, %Y, %I:%M %p') }}</span></div>
+    {% endif %}
+    {% if res.fulfilled_at %}
+    <div class="time-row" style="color:#4a9eff">Fulfilled: <span>{{ res.fulfilled_at.strftime('%b %d, %Y, %I:%M %p') }}</span></div>
+    {% endif %}
+    {% if res.status == 'pending' %}
+    <form method="POST" action="/user/cancel-reservation/{{ res.id }}">
+        <button class="cancel-btn">✕ Cancel</button>
+    </form>
+    {% endif %}
+</div>
+{% else %}
+<p style="color:#666">No reservations found.</p>
+{% endfor %}
+</div>
+{% endblock %}
+

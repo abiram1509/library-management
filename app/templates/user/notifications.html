@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+
+{% block styles %}
+.notif-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    border: 1px solid #2a2a3e;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.notif-card.unread { border-left: 3px solid #7c6af7; }
+.notif-msg  { font-size: 14px; flex: 1; }
+.notif-time { font-size: 12px; color: #666; white-space: nowrap; }
+.empty { color: #666; font-size: 14px; }
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Notifications</div>
+<div class="page-subtitle">Your recent alerts and updates</div>
+
+{% for n in notifs %}
+<div class="notif-card {% if not n.is_read %}unread{% endif %}">
+    <div class="notif-icon">
+        {% if n.type == 'due_alert' %}⏰
+        {% elif n.type == 'fine_warning' %}💰
+        {% elif n.type == 'reservation' %}📗
+        {% else %}📢{% endif %}
+    </div>
+    <div class="notif-msg">{{ n.message }}</div>
+    <div class="notif-time">{{ n.created_at.strftime('%b %d, %I:%M %p') }}</div>
+</div>
+{% else %}
+<p class="empty">No notifications yet. You're all caught up!</p>
+{% endfor %}
+{% endblock %}

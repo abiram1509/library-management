@@ -1,0 +1,39 @@
+{% extends "admin/base.html" %}
+{% block title %}Reservations{% endblock %}
+
+{% block styles %}
+.tabs { display:flex; gap:8px; margin-bottom:24px; border-bottom:1px solid #2a2a3e; }
+.tab  { padding:10px 20px; color:#666; text-decoration:none; font-size:14px; border-bottom:2px solid transparent; margin-bottom:-1px; }
+.tab.active { color:#ff4444; border-bottom:2px solid #ff4444; }
+.res-card { background:#1a1a2e; border-radius:12px; padding:20px; margin-bottom:12px; border:1px solid #2a2a3e; display:flex; justify-content:space-between; align-items:center; }
+.res-info h3 { font-size:15px; margin-bottom:4px; }
+.res-info p  { font-size:13px; color:#666; }
+.badge { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; }
+.badge-pending   { background:#2a2000; color:#ffaa00; }
+.badge-available { background:#002a1a; color:#00c851; }
+.badge-fulfilled { background:#001a2a; color:#4a9eff; }
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Reservations</div>
+<div class="page-subtitle">Manage all book reservations</div>
+
+<div class="tabs">
+    <a href="?status=all"       class="tab {% if status=='all' %}active{% endif %}">All</a>
+    <a href="?status=pending"   class="tab {% if status=='pending' %}active{% endif %}">Pending</a>
+    <a href="?status=available" class="tab {% if status=='available' %}active{% endif %}">Available</a>
+    <a href="?status=fulfilled" class="tab {% if status=='fulfilled' %}active{% endif %}">Fulfilled</a>
+</div>
+
+{% for res in reservations %}
+<div class="res-card">
+    <div class="res-info">
+        <h3>{{ res.book.title }}</h3>
+        <p>{{ res.user.name }} · Reserved: {{ res.reserved_at.strftime('%b %d, %Y') }}</p>
+    </div>
+    <span class="badge badge-{{ res.status }}">{{ res.status.upper() }}</span>
+</div>
+{% else %}
+<p style="color:#666">No reservations found.</p>
+{% endfor %}
+{% endblock %}

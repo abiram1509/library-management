@@ -1,0 +1,121 @@
+{% extends "admin/base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block styles %}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.stat-card {
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #2a2a3e;
+}
+.stat-card .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-card .value { font-size: 32px; font-weight: 700; }
+.stat-card .sub   { font-size: 12px; margin-top: 4px; }
+.c1 { background: #1a1a3a; }
+.c2 { background: #1a2a1a; }
+.c3 { background: #1a1a2a; }
+.c4 { background: #2a1a1a; }
+.c5 { background: #1a2a2a; }
+.c6 { background: #2a2a1a; }
+.c7 { background: #2a1a2a; }
+
+.stats-grid2 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+.section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #aaa; }
+.activity-feed {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #2a2a3e;
+}
+.activity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #2a2a3e;
+    font-size: 13px;
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-item .info { color: #aaa; }
+.activity-item .info span { color: white; font-weight: 600; }
+.badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.badge-loan     { background: #1a2a3a; color: #4a9eff; }
+.badge-overdue  { background: #3a1a1a; color: #ff4444; }
+.badge-returned { background: #1a3a1a; color: #00c851; }
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Dashboard Overview</div>
+<div class="page-subtitle">Welcome back! Here's what's happening in your library today.</div>
+
+<div class="stats-grid">
+    <div class="stat-card c1">
+        <div class="label">Total Books</div>
+        <div class="value">{{ total_books }}</div>
+        <div class="sub" style="color:#7c6af7">In collection</div>
+    </div>
+    <div class="stat-card c2">
+        <div class="label">Active Loans</div>
+        <div class="value">{{ active_loans }}</div>
+        <div class="sub" style="color:#ff4444">{{ overdue_loans }} overdue</div>
+    </div>
+    <div class="stat-card c3">
+        <div class="label">Total Users</div>
+        <div class="value">{{ total_users }}</div>
+        <div class="sub" style="color:#00c851">Registered members</div>
+    </div>
+    <div class="stat-card c4">
+        <div class="label">Revenue</div>
+        <div class="value">₹{{ revenue }}</div>
+        <div class="sub" style="color:#ffaa00">This month</div>
+    </div>
+</div>
+
+<div class="stats-grid2">
+    <div class="stat-card c5">
+        <div class="label">Active Subscriptions</div>
+        <div class="value">{{ active_subs }}</div>
+    </div>
+    <div class="stat-card c6">
+        <div class="label">Pending Reservations</div>
+        <div class="value">{{ pending_reservations }}</div>
+    </div>
+    <div class="stat-card c7">
+        <div class="label">Pending Fines</div>
+        <div class="value">₹{{ pending_fines }}</div>
+    </div>
+</div>
+
+<div class="section-title">Recent Activity</div>
+<div class="activity-feed">
+    {% for loan in recent_activity %}
+    <div class="activity-item">
+        <div class="info">
+            <span>{{ loan.user.name }}</span> borrowed
+            <span>{{ loan.book.title }}</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center">
+            <span style="font-size:12px; color:#666">{{ loan.checkout_date.strftime('%b %d, %Y') }}</span>
+            <span class="badge badge-{{ loan.status }}">{{ loan.status.upper() }}</span>
+        </div>
+    </div>
+    {% else %}
+    <p style="color:#666; font-size:14px">No recent activity.</p>
+    {% endfor %}
+</div>
+{% endblock %}

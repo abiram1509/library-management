@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block styles %}
+.profile-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 32px;
+    border: 1px solid #2a2a3e;
+    max-width: 500px;
+}
+.avatar {
+    width: 80px; height: 80px;
+    background: #7c6af7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 24px;
+}
+label { display: block; font-size: 13px; color: #aaa; margin-bottom: 6px; }
+input {
+    width: 100%;
+    padding: 12px;
+    background: #0f0f1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+input:focus { outline: none; border-color: #7c6af7; }
+.save-btn {
+    padding: 12px 24px;
+    background: #7c6af7;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.divider {
+    border: none;
+    border-top: 1px solid #2a2a3e;
+    margin: 24px 0;
+}
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Profile</div>
+<div class="page-subtitle">Manage your account information</div>
+
+<div class="profile-card">
+    <div class="avatar">{{ session['name'][0].upper() }}</div>
+
+    <form method="POST">
+        <label>Full Name</label>
+        <input type="text" name="name" value="{{ user.name }}" required>
+
+        <label>Email</label>
+        <input type="email" value="{{ user.email }}" disabled style="opacity:0.5">
+
+        <hr class="divider">
+
+        <label>New Password (leave blank to keep current)</label>
+        <input type="password" name="new_password" placeholder="••••••••">
+
+        <button class="save-btn" type="submit">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

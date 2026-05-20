@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}My Fines{% endblock %}
+
+{% block styles %}
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.stat-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #2a2a3e;
+}
+.stat-card .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-card .value { font-size: 32px; font-weight: 700; }
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #2a2a3e;
+}
+.tab {
+    padding: 10px 20px;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+.tab.active { color: #7c6af7; border-bottom: 2px solid #7c6af7; }
+.fine-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    border: 1px solid #2a2a3e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.fine-info h3  { font-size: 15px; margin-bottom: 4px; }
+.fine-info p   { font-size: 13px; color: #666; }
+.fine-right    { text-align: right; }
+.fine-amount   { font-size: 24px; font-weight: 700; color: #ff4444; margin-bottom: 8px; }
+.badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+.badge-pending { background: #3a1a1a; color: #ff4444; }
+.badge-paid    { background: #1a3a1a; color: #00c851; }
+.pay-btn {
+    padding: 8px 16px;
+    background: #7c6af7;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+.fine-type-late    { border-left: 3px solid #ff4444; }
+.fine-type-damaged { border-left: 3px solid #ff8800; }
+.fine-type-lost    { border-left: 3px solid #cc44ff; }
+{% endblock %}
+
+{% block content %}
+
+<div class="page-title">💰 My Fines</div>
+<div class="page-subtitle">Track and pay your library fines</div>
+
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="label">Pending Fines</div>
+        <div class="value" style="color:#ff4444">₹{{ total_pending }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Total Paid</div>
+        <div class="value" style="color:#00c851">₹{{ total_paid }}</div>
+    </div>
+</div>
+
+<div class="tabs">
+    <a href="?status=all"     class="tab {% if status == 'all' %}active{% endif %}">All</a>
+    <a href="?status=pending" class="tab {% if status == 'pending' %}active{% endif %}">Pending</a>
+    <a href="?status=paid"    class="tab {% if status == 'paid' %}active{% endif %}">Paid</a>
+</div>
+
+{% for fine in fines %}
+<div class="fine-card fine-type-{{ fine.fine_type }}">
+    <div class="fine-info">
+        <h3>{{ fine.loan.book.title }}</h3>
+        <p>
+            Type: {{ fine.fine_type.upper() }} fine ·
+            Date: {{ fine.created_at.strftime('%b %d, %Y') }}
+        </p>
+        {% if fine.paid_at %}
+        <p style="color:#00c851; font-size:12px">Paid on {{ fine.paid_at.strftime('%b %d, %Y') }}</p>
+        {% endif %}
+    </div>
+    <div class="fine-right">
+        <div class="fine-amount">₹{{ fine.amount }}</div>
+        <span class="badge badge-{{ fine.status }}">{{ fine.status.upper() }}</span>
+        {% if fine.status == 'pending' %}
+        <br>
+        <form method="POST" action="/payment/pay-fine/{{ fine.id }}">
+            <button class="pay-btn">Pay Now</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<p style="color:#666">No fines found. Keep returning books on time! 🎉</p>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block styles %}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+.stat-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #2a2a3e;
+}
+.stat-card .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-card .value { font-size: 32px; font-weight: 700; color: white; }
+.stat-card .sub   { font-size: 12px; color: #7c6af7; margin-top: 4px; }
+
+.section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #aaa; }
+
+.loan-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    border: 1px solid #2a2a3e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.loan-card .book-info h4 { font-size: 15px; margin-bottom: 4px; }
+.loan-card .book-info p  { font-size: 12px; color: #666; }
+.badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.badge-active   { background: #1a3a1a; color: #00c851; }
+.badge-overdue  { background: #3a1a1a; color: #ff4444; }
+.badge-returned { background: #1a2a3a; color: #4a9eff; }
+
+.fine-warning {
+    background: #2a1a0a;
+    border: 1px solid #ff8800;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: #ff8800;
+}
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Dashboard Overview</div>
+<div class="page-subtitle">Welcome back, {{ session['name'] }}! Here's what's happening.</div>
+
+{% if predicted_fine > 0 %}
+<div class="fine-warning">
+    Smart Fine Predictor: You have {{ overdue_loans }} overdue book(s). 
+    Predicted fine if not returned today: <strong>₹{{ predicted_fine }}</strong>
+</div>
+{% endif %}
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="label">Active Loans</div>
+        <div class="value">{{ active_loans }}</div>
+        <div class="sub">Books borrowed</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Reservations</div>
+        <div class="value">{{ total_reservations }}</div>
+        <div class="sub">Pending pickup</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Pending Fines</div>
+        <div class="value">₹{{ pending_fines }}</div>
+        <div class="sub">To be paid</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Subscription</div>
+        <div class="value">{{ plan }}</div>
+        <div class="sub">{{ days_left }} days left</div>
+    </div>
+</div>
+
+<div class="section-title">Recent Loans</div>
+{% for loan in recent_loans %}
+<div class="loan-card">
+    <div class="book-info">
+        <h4>{{ loan.book.title }}</h4>
+        <p>Due: {{ loan.due_date.strftime('%b %d, %Y') }} · ISBN: {{ loan.book.isbn }}</p>
+    </div>
+    <span class="badge badge-{{ loan.status }}">{{ loan.status.upper() }}</span>
+</div>
+{% else %}
+<div class="loan-card">
+    <div class="book-info">
+        <h4>No loans yet</h4>
+        <p>Browse books and start borrowing</p>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

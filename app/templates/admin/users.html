@@ -1,0 +1,53 @@
+{% extends "admin/base.html" %}
+{% block title %}Users{% endblock %}
+
+{% block styles %}
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; padding:12px 16px; font-size:12px; color:#666; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #2a2a3e; }
+td { padding:14px 16px; font-size:14px; border-bottom:1px solid #1a1a2e; }
+tr:hover td { background:#1a1a2e; }
+.badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.badge-active  { background:#1a3a1a; color:#00c851; }
+.badge-expired { background:#3a1a1a; color:#ff4444; }
+.badge-none    { background:#2a2a2a; color:#666; }
+{% endblock %}
+
+{% block content %}
+<div class="page-title">👥 Users</div>
+<div class="page-subtitle">All registered members</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Joined</th>
+            <th>Subscription</th>
+            <th>Active Loans</th>
+            <th>Pending Fines</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+        <td>
+            {% if user.subscription %}
+            <span class="badge badge-{{ user.subscription.status }}">
+                {{ user.subscription.plan.upper() }}
+            </span>
+            {% else %}
+            <span class="badge badge-none">NONE</span>
+            {% endif %}
+        </td>
+        <td>{{ user.loans | selectattr('status', 'equalto', 'active') | list | length }}</td>
+        <td style="color:#ff4444">
+            ₹{{ user.fines | selectattr('status', 'equalto', 'pending') | sum(attribute='amount') | round(2) }}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

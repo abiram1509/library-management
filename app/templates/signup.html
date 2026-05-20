@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+        .card {
+            background: #050510;
+            padding: 40px;
+            border-radius: 16px;
+            width: 400px;
+            border: 1px solid #00ff80;
+            box-shadow: 0 0 30px rgba(0,255,128,0.15);
+        }
+        h1 { font-size: 28px; margin-bottom: 8px; color: #00ff80; text-shadow: 0 0 10px #00ff80; font-family: 'Share Tech Mono', monospace; }
+        p  { color: #888; margin-bottom: 24px; font-size: 14px; }
+        .flash-error   { background: #ff4444; padding: 10px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+        .flash-success { background: #00c851; padding: 10px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+        label { display: block; margin-bottom: 6px; font-size: 13px; color: #aaa; }
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #0f0f1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        input:focus { outline: none; border-color: #7c6af7; }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #00ff80;
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+        button:hover { background: #00cc66; }
+        .link { text-align: center; margin-top: 16px; font-size: 13px; color: #888; }
+        .link a { color: #7c6af7; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Library</h1>
+        <p>Create your account</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <label>Full Name</label>
+            <input type="text" name="name" placeholder="Abi Ram" required>
+            <label>Email</label>
+            <input type="email" name="email" placeholder="you@email.com" required>
+            <label>Password</label>
+            <input type="password" name="password" placeholder="••••••••" required>
+            <button type="submit">Create Account</button>
+        </form>
+
+        <div class="link">
+            Already have an account? <a href="/login">Login</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Subscriptions{% endblock %}
+
+{% block styles %}
+.sub-title { text-align:center; font-size:16px; color:#888; margin-bottom:32px; }
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.plan-card {
+    background: #1a1a2e;
+    border-radius: 16px;
+    padding: 28px;
+    border: 1px solid #2a2a3e;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    transition: transform 0.2s;
+}
+.plan-card:hover { transform: translateY(-4px); }
+.plan-card.popular { border-color: #7c6af7; }
+.plan-card.current { border-color: #00c851; }
+.badge-popular { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#7c6af7; color:white; padding:4px 16px; border-radius:20px; font-size:12px; font-weight:700; }
+.badge-active  { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#00c851; color:white; padding:4px 16px; border-radius:20px; font-size:12px; font-weight:700; }
+.plan-name  { font-size:22px; font-weight:700; }
+.plan-price { font-size:36px; font-weight:800; color:#7c6af7; }
+.plan-price span { font-size:14px; color:#666; font-weight:400; }
+.plan-desc  { font-size:13px; color:#666; }
+.plan-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #0f0f1a;
+    border-radius: 8px;
+    padding: 12px;
+    font-size:13px;
+}
+.plan-feature .icon { font-size:20px; }
+.plan-feature .feat-label { font-size:11px; color:#666; }
+.plan-feature .feat-value { font-size:15px; font-weight:700; }
+.subscribe-btn {
+    margin-top: auto;
+    padding: 12px;
+    background: #7c6af7;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+}
+.subscribe-btn:disabled { background:#333; color:#666; cursor:not-allowed; }
+.subscribe-btn.switch   { background: transparent; border: 1px solid #7c6af7; color:#7c6af7; }
+{% endblock %}
+
+{% block content %}
+<div class="page-title" style="text-align:center">Subscriptions</div>
+<div class="sub-title">Select a plan that fits your reading habits</div>
+
+<div class="plans-grid">
+    {% for plan_name, plan in plans.items() %}
+    <div class="plan-card 
+        {% if plan_name == 'gold' %}popular{% endif %}
+        {% if current and current.plan == plan_name %}current{% endif %}">
+
+        {% if plan_name == 'gold' and not (current and current.plan == 'gold') %}
+        <div class="badge-popular">Most Popular</div>
+        {% endif %}
+        {% if current and current.plan == plan_name %}
+        <div class="badge-active">Active</div>
+        {% endif %}
+
+        <div class="plan-name">{{ plan_name.capitalize() }} Membership</div>
+        <div style="font-size:11px; color:#666; text-transform:uppercase; letter-spacing:1px">Monthly</div>
+        <div class="plan-desc">
+            {% if plan_name == 'silver' %}Access up to 10 books for 30 days with extended loan duration.
+            {% elif plan_name == 'gold' %}Ideal for avid readers — extended checkout duration and more book access.
+            {% else %}Premium access with maximum borrowing limits, faster checkouts, and priority support.{% endif %}
+        </div>
+        <div class="plan-price">₹{{ plan.price }}<span>/mo</span></div>
+
+        <div class="plan-feature">
+            <div class="icon"></div>
+            <div>
+                <div class="feat-label">Borrow Limit</div>
+                <div class="feat-value">{{ plan.borrow_limit }} Books</div>
+            </div>
+        </div>
+        <div class="plan-feature">
+            <div class="icon"></div>
+            <div>
+                <div class="feat-label">Loan Duration</div>
+                <div class="feat-value">{{ plan.loan_duration }} Days/Book</div>
+            </div>
+        </div>
+
+        {% if current and current.plan == plan_name %}
+        <button class="subscribe-btn" disabled>Current Plan</button>
+        <form method="POST" action="/payment/cancel-subscription" style="margin-top:8px">
+            <button type="submit" style="width:100%; padding:8px; background:transparent; border:1px solid #ff4444; border-radius:8px; color:#ff4444; cursor:pointer; font-size:13px;" 
+                onclick="return confirm('Cancel your subscription?')">
+                Cancel Plan
+            </button>
+        </form>
+        {% else %}
+        <button class="subscribe-btn {% if current %}switch{% endif %}"
+            onclick="startPayment('{{ plan_name }}', {{ plan.price }})">
+            {% if current %}Switch Plan{% else %}Subscribe{% endif %}
+        </button>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function startPayment(plan, amount) {
+    if (confirm(`Subscribe to ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan for ₹${amount}/month?`)) {
+        fetch(`/payment/subscribe/${plan}`, { method: 'POST' })
+            .then(() => window.location.reload());
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}My Loans{% endblock %}
+
+{% block styles %}
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #2a2a3e;
+    padding-bottom: 0;
+}
+.tab {
+    padding: 10px 20px;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+.tab.active { color: #7c6af7; border-bottom: 2px solid #7c6af7; }
+.loan-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    border: 1px solid #2a2a3e;
+}
+.loan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+.loan-header h3 { font-size: 16px; margin-bottom: 4px; }
+.loan-header p  { font-size: 13px; color: #666; }
+.loan-dates {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.loan-dates .date-item label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
+.loan-dates .date-item span  { font-size: 13px; color: white; }
+.badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.badge-active   { background: #1a3a1a; color: #00c851; }
+.badge-overdue  { background: #3a1a1a; color: #ff4444; }
+.badge-returned { background: #1a2a3a; color: #4a9eff; }
+.badge-lost     { background: #2a1a0a; color: #ff8800; }
+.badge-damaged  { background: #2a1a2a; color: #cc44ff; }
+.renew-btn {
+    padding: 6px 16px;
+    background: #7c6af7;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+}
+.note { font-size: 12px; color: #666; font-style: italic; }
+{% endblock %}
+
+{% block content %}
+<div class="page-title">My Borrowed Books</div>
+<div class="page-subtitle">Manage your book loans, track due dates, and renew books</div>
+
+<div class="tabs">
+    <a href="?status=all"      class="tab {% if status == 'all' %}active{% endif %}">All</a>
+    <a href="?status=active"   class="tab {% if status == 'active' %}active{% endif %}">Active</a>
+    <a href="?status=overdue"  class="tab {% if status == 'overdue' %}active{% endif %}">Overdue</a>
+    <a href="?status=returned" class="tab {% if status == 'returned' %}active{% endif %}">Returned</a>
+    <a href="?status=lost"     class="tab {% if status == 'lost' %}active{% endif %}">Lost</a>
+    <a href="?status=damaged"  class="tab {% if status == 'damaged' %}active{% endif %}">Damaged</a>
+</div>
+
+{% for loan in loans %}
+<div class="loan-card">
+    <div class="loan-header">
+        <div>
+            <h3>{{ loan.book.title }}</h3>
+            <p>{{ loan.book.author }} · ISBN: {{ loan.book.isbn }}</p>
+        </div>
+        <span class="badge badge-{{ loan.status }}">{{ loan.status.upper() }}</span>
+    </div>
+    <div class="loan-dates">
+        <div class="date-item">
+            <label>Checkout Date</label>
+            <span>{{ loan.checkout_date.strftime('%b %d, %Y') }}</span>
+        </div>
+        <div class="date-item">
+            <label>Due Date</label>
+            <span {% if loan.due_date < today and loan.status == 'overdue' %}style="color:#ff4444"{% endif %}>
+                {{ loan.due_date.strftime('%b %d, %Y') }}
+            </span>
+        </div>
+        <div class="date-item">
+            <label>Return Date</label>
+            <span>{{ loan.return_date.strftime('%b %d, %Y') if loan.return_date else '—' }}</span>
+        </div>
+        <div class="date-item">
+            <label>Renewals</label>
+            <span>{{ loan.renewals_used }}/{{ loan.max_renewals }}</span>
+        </div>
+    </div>
+    {% if loan.status in ['active', 'overdue'] and loan.renewals_used < loan.max_renewals %}
+    <form method="POST" action="/user/renew/{{ loan.id }}" style="display:inline">
+        <button class="renew-btn">🔄 Renew</button>
+    </form>
+    {% endif %}
+    <div class="note">Note: Assigned by {{ loan.assigned_by.capitalize() }}</div>
+</div>
+{% else %}
+<p style="color:#666">No loans found.</p>
+{% endfor %}
+{% endblock %}

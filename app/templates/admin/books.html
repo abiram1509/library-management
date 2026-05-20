@@ -1,0 +1,124 @@
+{% extends "admin/base.html" %}
+{% block title %}Books{% endblock %}
+
+{% block styles %}
+.add-form {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #2a2a3e;
+    margin-bottom: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.add-form input, .add-form select {
+    padding: 10px 14px;
+    background: #0f0f1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+}
+.add-form button {
+    padding: 10px;
+    background: #ff4444;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    grid-column: span 3;
+}
+table { width: 100%; border-collapse: collapse; }
+th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #2a2a3e;
+}
+td {
+    padding: 14px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid #1a1a2e;
+}
+tr:hover td { background: #1a1a2e; }
+.del-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid #ff4444;
+    border-radius: 6px;
+    color: #ff4444;
+    cursor: pointer;
+    font-size: 12px;
+}
+.avail { color: #00c851; }
+.unavail { color: #ff4444; }
+.book-cover {
+    width: 50px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Books</div>
+<div class="page-subtitle">Manage your book collection</div>
+
+<form method="POST" class="add-form">
+    <input type="text"   name="title"        placeholder="Book Title"    required>
+    <input type="text"   name="author"       placeholder="Author"        required>
+    <input type="text"   name="isbn"         placeholder="ISBN"          required>
+    <select name="genre_id" required>
+        <option value="">Select Genre</option>
+        {% for genre in genres %}
+        <option value="{{ genre.id }}">{{ genre.name }}</option>
+        {% endfor %}
+    </select>
+    <input type="number" name="price"        placeholder="Price (₹)"     required step="0.01">
+    <input type="number" name="total_copies" placeholder="Total Copies"  required min="1">
+    <button type="submit">+ Add Book</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Cover</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Genre</th>
+            <th>Price</th>
+            <th>Available</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for book in books %}
+    <tr>
+        <td>
+            <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-S.jpg" 
+                 alt="{{ book.title }}"
+                 class="book-cover"
+                 onerror="this.src='https://via.placeholder.com/50x75?text=Cover'">
+        </td>
+        <td>{{ book.title }}</td>
+        <td>{{ book.author }}</td>
+        <td>{{ book.genre.name if book.genre else '—' }}</td>
+        <td>₹{{ book.price }}</td>
+        <td class="{% if book.available_copies > 0 %}avail{% else %}unavail{% endif %}">
+            {{ book.available_copies }}/{{ book.total_copies }}
+        </td>
+        <td>
+            <form method="POST" action="/admin/books/delete/{{ book.id }}">
+                <button class="del-btn">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

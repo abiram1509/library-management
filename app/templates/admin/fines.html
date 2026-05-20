@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% block title %}Fines{% endblock %}
+
+{% block styles %}
+.tabs { display:flex; gap:8px; margin-bottom:24px; border-bottom:1px solid #2a2a3e; }
+.tab  { padding:10px 20px; color:#666; text-decoration:none; font-size:14px; border-bottom:2px solid transparent; margin-bottom:-1px; }
+.tab.active { color:#ff4444; border-bottom:2px solid #ff4444; }
+.summary { background:#1a1a2e; border-radius:12px; padding:20px; border:1px solid #2a2a3e; margin-bottom:24px; }
+.summary h3 { font-size:24px; color:#ff4444; }
+.fine-card { background:#1a1a2e; border-radius:12px; padding:20px; margin-bottom:12px; border:1px solid #2a2a3e; display:flex; justify-content:space-between; align-items:center; }
+.fine-info h3 { font-size:15px; margin-bottom:4px; }
+.fine-info p  { font-size:13px; color:#666; }
+.fine-amount  { font-size:24px; font-weight:700; color:#ff4444; }
+.badge { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; }
+.badge-pending { background:#3a1a1a; color:#ff4444; }
+.badge-paid    { background:#1a3a1a; color:#00c851; }
+.mark-paid-btn { padding:6px 14px; background:#00c851; border:none; border-radius:6px; color:white; cursor:pointer; font-size:12px; font-weight:600; margin-top:8px; }
+{% endblock %}
+
+{% block content %}
+<div class="page-title">Fines</div>
+<div class="page-subtitle">Manage all library fines</div>
+
+<div class="summary">
+    <div style="font-size:13px; color:#666; margin-bottom:4px">TOTAL PENDING</div>
+    <h3>₹{{ total_pending }}</h3>
+</div>
+
+<div class="tabs">
+    <a href="?status=all"     class="tab {% if status=='all' %}active{% endif %}">All</a>
+    <a href="?status=pending" class="tab {% if status=='pending' %}active{% endif %}">Pending</a>
+    <a href="?status=paid"    class="tab {% if status=='paid' %}active{% endif %}">Paid</a>
+</div>
+
+{% for fine in fines %}
+<div class="fine-card">
+    <div class="fine-info">
+        <h3>{{ fine.loan.book.title }}</h3>
+        <p>{{ fine.user.name }} · {{ fine.fine_type.upper() }} · {{ fine.created_at.strftime('%b %d, %Y') }}</p>
+    </div>
+    <div style="text-align:right">
+        <div class="fine-amount">₹{{ fine.amount }}</div>
+        <span class="badge badge-{{ fine.status }}">{{ fine.status.upper() }}</span>
+        {% if fine.status == 'pending' %}
+        <br>
+        <form method="POST" action="/admin/fines/mark-paid/{{ fine.id }}">
+            <button class="mark-paid-btn">✓ Mark Paid</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<p style="color:#666">No fines found.</p>
+{% endfor %}
+{% endblock %}
